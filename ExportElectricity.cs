@@ -41,7 +41,7 @@ namespace ExportElectricityMod
 			}
 
 			d = dm_array[0].m_districts.m_buffer[0];
-			capacity = ((double)d.GetElectricityCapacity ()) / 1000.0; // divide my 1000 to get megawatts
+			capacity = ((double)d.GetElectricityCapacity ()) / 1000.0; // divide by 1000 to get megawatts
 			consumption = ((double) d.GetElectricityConsumption()) / 1000.0;
 
 			if (!updated) {
