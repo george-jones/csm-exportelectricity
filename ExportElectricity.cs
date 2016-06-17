@@ -6,7 +6,14 @@ using System.IO;
 
 namespace ExportElectricityMod
 {
-	public class ExportElectricity : IUserMod {
+	public class ExportElectricity : IUserMod
+	{
+		private Exportable.ExportableManager expm;
+
+		public ExportElectricity ()
+		{
+			expm = new Exportable.ExportableManager ();
+		}
 
 		public string Name 
 		{
@@ -15,7 +22,18 @@ namespace ExportElectricityMod
 
 		public string Description 
 		{
-			get { return "Earn money for unused electricity.  Only a modest income for power sources other than the Fusion power plant."; }
+			get { return "Earn money for unused electricity and (optionally) other production."; }
+		}
+
+		public void OnSettingsUI(UIHelperBase helper)
+		{
+			UIHelperBase group = helper.AddGroup("Check to enable income from excess capacity");
+			expm.AddOptions (group);
+		}
+
+		private void EventCheckElectricity (bool c)
+		{
+			Debug.Log (c);
 		}
 	}
 
@@ -43,6 +61,40 @@ namespace ExportElectricityMod
 			d = dm_array[0].m_districts.m_buffer[0];
 			capacity = ((double)d.GetElectricityCapacity ()) / 1000.0; // divide by 1000 to get megawatts
 			consumption = ((double) d.GetElectricityConsumption()) / 1000.0;
+
+			d.GetCremateCapacity (); // how to make work w/ cemeteries
+			d.GetDeadAmount();
+			d.GetDeadCapacity();
+
+			d.GetEducation1Capacity ();
+			d.GetEducation1Need ();
+
+			d.GetEducation2Capacity ();
+			d.GetEducation2Need ();
+
+			d.GetEducation3Capacity ();
+			d.GetEducation3Need ();
+
+			d.GetCriminalCapacity ();
+			d.GetCriminalAmount ();
+
+			d.GetHealCapacity ();
+			d.GetSickCount ();
+
+			d.GetIncinerationCapacity (); // how to make work w/ landfills
+			d.GetGarbageAmount();
+			d.GetGarbageCapacity ();
+
+			d.GetSewageAccumulation ();
+			d.GetSewageCapacity ();
+
+			d.GetWaterCapacity ();
+			d.GetWaterConsumption ();
+
+
+
+
+
 
 			if (!updated) {
 				updated = true;
