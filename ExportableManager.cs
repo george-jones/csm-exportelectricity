@@ -1,12 +1,15 @@
 ﻿using ICities;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 
 namespace Exportable
 {
 	public class ExportableManager
 	{
 		private SortedDictionary<string, Exportable> exportables;
+		public const String CONF = "ExportElectricityModConfig.txt";
 
 		public ExportableManager ()
 		{
@@ -23,6 +26,13 @@ namespace Exportable
 			new ExportableJail (this);
 			new ExportableSewage (this);
 			new ExportableWater (this);
+
+			LoadSettings ();
+		}
+
+		public void Log (String msg)
+		{
+			Debug.Log ("[Export Electricity] " + msg);
 		}
 
 		public void AddExportable (Exportable exp)
@@ -30,9 +40,51 @@ namespace Exportable
 			exportables.Add (exp.Id, exp);
 		}
 
+		public void LoadSettings ()
+		{
+			Log ("Load Settings");
+			try {
+				using (System.IO.StreamReader file = 
+					new System.IO.StreamReader(CONF, true))
+				{
+					String s = file.ReadLine ();
+					String [] ids = s.Split(new char[1]{','});
+
+					foreach (var id in ids) {
+						if (exportables.ContainsKey(id)) {
+							exportables[id].SetEnabled(true, false);
+						}
+					}
+				}
+			} catch (Exception e) {
+				// no file? use defaults
+				Log ("Using defaults: " + e.ToString());
+				exportables[Ids.ELECTRICITY].SetEnabled(true);
+			}
+		}
+
 		public void StoreSettings ()
 		{
-			// TODO
+			Log ("Store Settings");
+			try {
+				using (System.IO.FileStream file =
+					new System.IO.FileStream(CONF, FileMode.Create))
+				{
+					List<String>enabled_ids = new List<String>();
+					StreamWriter sw = new StreamWriter(file);
+					foreach (var pair in exportables) {
+						if (pair.Value.GetEnabled()) {
+							enabled_ids.Add(pair.Key);
+						}
+					}
+					String cs = String.Join(",", enabled_ids.ToArray());
+					Log ("Storing settings - enabled: " + cs);
+					sw.WriteLine(cs);
+					sw.Flush();
+				}
+			} catch (Exception e) {
+				Log ("Error storing settings: " + e.ToString());
+			}
 		}
 
 		public double CalculateIncome (DistrictManager dm, String id, double weekPortion)
@@ -62,9 +114,10 @@ namespace Exportable
 
 		public void AddOptions (UIHelperBase group)
 		{
+			LoadSettings ();
 			foreach (var id in exportables.Keys) {
 				Exportable exp = exportables [id];
-				group.AddCheckbox(exp.Description, false, exp.SetEnabled);
+				group.AddCheckbox(exp.Description, exp.GetEnabled(), exp.SetEnabled);
 			}
 		}
 	}

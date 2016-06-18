@@ -35,8 +35,15 @@ namespace Exportable
 
 		public void SetEnabled (bool e)
 		{			
+			SetEnabled (e, true);
+		}
+
+		public void SetEnabled (bool e, bool doSave)
+		{
 			Enabled = e;
-			Expm.StoreSettings ();
+			if (doSave) {
+				Expm.StoreSettings ();
+			}
 		}
 
 		public bool GetEnabled ()
