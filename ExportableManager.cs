@@ -43,7 +43,7 @@ namespace Exportable
 		public void LoadSettings ()
 		{
 			Log ("Load Settings");
-			try {
+			try { 
 				using (System.IO.StreamReader file = 
 					new System.IO.StreamReader(CONF, true))
 				{
