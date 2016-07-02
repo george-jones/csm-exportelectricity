@@ -32,7 +32,7 @@ namespace Exportable
 
 		public void Log (String msg)
 		{
-			Debug.Log ("[Export Electricity] " + msg);
+			ExportElectricityMod.Debugger.Write(msg);
 		}
 
 		public void AddExportable (Exportable exp)
@@ -87,26 +87,28 @@ namespace Exportable
 			}
 		}
 
-		public double CalculateIncome (DistrictManager dm, String id, double weekPortion)
+		public double CalculateIncome (District d, String id, double weekPortion)
 		{
 			double income = 0.0;
 
 			if (exportables.ContainsKey (id)) {
 				Exportable exp = exportables [id];
 				if (exp.GetEnabled()) {
-					income = exp.CalculateIncome (dm, weekPortion);
+					Log ("Calculating Income for " + id);
+					income = exp.CalculateIncome (d, weekPortion);
 				}
 			}
 
 			return income;
 		}
 
-		public double CalculateIncome (DistrictManager dm, double weekPortion)
+		public double CalculateIncome (District d, double weekPortion)
 		{
 			double total = 0.0;
+			Log ("Calculating Income");
 
 			foreach (var id in exportables.Keys) {
-				total += CalculateIncome (dm, id, weekPortion);
+				total += CalculateIncome (d, id, weekPortion);
 			}
 
 			return total;

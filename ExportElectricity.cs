@@ -3,18 +3,47 @@ using ColossalFramework;
 using ColossalFramework.Plugins;
 using UnityEngine;
 using System.IO;
+using System;
 
 namespace ExportElectricityMod
 {
+	public static class ExpmHolder
+	{
+		// because c# doesn't let you have bare variables in a namespace
+		private static Exportable.ExportableManager expm = null;
+
+		public static Exportable.ExportableManager get()
+		{
+			if (expm == null)
+			{
+				expm = new Exportable.ExportableManager ();
+			}
+			return expm;
+		}
+	}
+
+	public static class Debugger
+	{
+		// Debugger.Write appends to a text file.  This is here because Debug.Log wasn't having any effect
+		// when called from OnUpdateMoneyAmount.  Maybe a Unity thing that event handlers can't log?  I dunno.
+		public static bool enabled = false; // switch to true for development.  Also enabled automatically on exception.
+		public static void Write(String s)
+		{
+			if (!enabled)
+			{
+				return;
+			}
+
+			using (System.IO.FileStream file = new System.IO.FileStream("ExportElectricityModDebug.txt", FileMode.Append)) {
+				StreamWriter sw = new StreamWriter(file);
+				sw.WriteLine(s);
+    	       	sw.Flush();
+    	    }
+		}
+	}
+
 	public class ExportElectricity : IUserMod
 	{
-		private Exportable.ExportableManager expm;
-
-		public ExportElectricity ()
-		{
-			expm = new Exportable.ExportableManager ();
-		}
-
 		public string Name 
 		{
 			get { return "Export Electricity Mod"; }
@@ -28,12 +57,7 @@ namespace ExportElectricityMod
 		public void OnSettingsUI(UIHelperBase helper)
 		{
 			UIHelperBase group = helper.AddGroup("Check to enable income from excess capacity");
-			expm.AddOptions (group);
-		}
-
-		private void EventCheckElectricity (bool c)
-		{
-			Debug.Log (c);
+			ExpmHolder.get().AddOptions (group);			
 		}
 	}
 
@@ -44,85 +68,61 @@ namespace ExportElectricityMod
 
 		public override long OnUpdateMoneyAmount(long internalMoneyAmount)
 		{			
-			DistrictManager[] dm_array = UnityEngine.Object.FindObjectsOfType<DistrictManager>();
-			District d;
-			double capacity = 0;
-			double consumption = 0;
-			double pay_per_mw = 500.0;
-			double sec_per_day = 75600.0; // for some reason
-			double sec_per_week = 7 * sec_per_day;
-			double week_proportion = 0.0;
-			int export_earnings = 0;
+            try
+            {
+                DistrictManager DMinstance = Singleton<DistrictManager>.instance;
+                Array8<District> dm_array = DMinstance.m_districts;
+                District d;
+	            
+	            Debugger.Write("== OnUpdateMoneyAmount ==");
 
-			if (dm_array.Length <= 0) {
-				return internalMoneyAmount;
-			}
+				double sec_per_day = 75600.0; // for some reason
+				double sec_per_week = 7 * sec_per_day;
+				double week_proportion = 0.0;
+				int export_earnings = 0;
 
-			d = dm_array[0].m_districts.m_buffer[0];
-			capacity = ((double)d.GetElectricityCapacity ()) / 1000.0; // divide by 1000 to get megawatts
-			consumption = ((double) d.GetElectricityConsumption()) / 1000.0;
+ 				if (dm_array == null)
+                {
+                	Debugger.Write("early return, dm_array is null");
+                    return internalMoneyAmount;
+                }
 
-			d.GetCremateCapacity (); // how to make work w/ cemeteries
-			d.GetDeadAmount();
-			d.GetDeadCapacity();
+                d = dm_array.m_buffer[0];
 
-			d.GetEducation1Capacity ();
-			d.GetEducation1Need ();
-
-			d.GetEducation2Capacity ();
-			d.GetEducation2Need ();
-
-			d.GetEducation3Capacity ();
-			d.GetEducation3Need ();
-
-			d.GetCriminalCapacity ();
-			d.GetCriminalAmount ();
-
-			d.GetHealCapacity ();
-			d.GetSickCount ();
-
-			d.GetIncinerationCapacity (); // how to make work w/ landfills
-			d.GetGarbageAmount();
-			d.GetGarbageCapacity ();
-
-			d.GetSewageAccumulation ();
-			d.GetSewageCapacity ();
-
-			d.GetWaterCapacity ();
-			d.GetWaterConsumption ();
-
-
-
-
-
-
-			if (!updated) {
-				updated = true;
-				prevDate = this.managers.threading.simulationTime;
-			} else {
-				System.DateTime newDate = this.managers.threading.simulationTime;
-				System.TimeSpan timeDiff = newDate.Subtract (prevDate);
-				week_proportion = (((double) timeDiff.TotalSeconds) / sec_per_week);
-				if (capacity > consumption && week_proportion > 0.0) {
-					EconomyManager[] em_array = UnityEngine.Object.FindObjectsOfType<EconomyManager>();
-
-					export_earnings = (int)(week_proportion * (capacity - consumption) * pay_per_mw);
-					if (em_array.Length > 0) {
-						// add income
-						em_array[0].AddResource(EconomyManager.Resource.PublicIncome,
-							export_earnings,
-							ItemClass.Service.None,
-							ItemClass.SubService.None,
-							ItemClass.Level.None);							
-					}
+				if (!updated) {
+					updated = true;
+					prevDate = this.managers.threading.simulationTime;
+					Debugger.Write("first run");
 				} else {
-					export_earnings = 0;
-				}
-				prevDate = newDate;
+					System.DateTime newDate = this.managers.threading.simulationTime;
+					System.TimeSpan timeDiff = newDate.Subtract (prevDate);
+					week_proportion = (((double) timeDiff.TotalSeconds) / sec_per_week);
+					if (week_proportion > 0.0) {
+						Debugger.Write("proportion: " + week_proportion.ToString());
+						EconomyManager EM = Singleton<EconomyManager>.instance;
+						if (EM != null) {
+							// add income							
+							export_earnings = (int) ExpmHolder.get().CalculateIncome(d, week_proportion);							
+							Debugger.Write("export_earnings: " + export_earnings.ToString());
+							EM.AddResource(EconomyManager.Resource.PublicIncome,
+								export_earnings,
+								ItemClass.Service.None,
+								ItemClass.SubService.None,
+								ItemClass.Level.None);							
+						}
+					} else {
+						Debugger.Write("week_proportion zero");
+					}
+					prevDate = newDate;
+				}	            	
 			}
-
+	        catch (Exception ex)
+	        {
+	        	// shouldn't happen, but if it does, start logging
+	        	Debugger.enabled = true;
+	        	Debugger.Write("Exception " + ex.Message.ToString());
+	        }
 			return internalMoneyAmount;
 		}
 	}
-
 }
