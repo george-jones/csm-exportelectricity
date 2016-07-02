@@ -15,12 +15,12 @@ namespace Exportable
 		{
 			exportables = new SortedDictionary<string, Exportable> ();
 
-			new ExportableCremation (this);
+			//new ExportableCremation (this);
 			new ExportableElementary (this);
 			new ExportableHighSchool (this);
 			new ExportableUniversity (this);
 			new ExportableElectricity (this);
-			new ExportableIncineration (this);
+			//new ExportableIncineration (this);
 			new ExportableHealth (this);
 			new ExportableHeat (this);
 			new ExportableJail (this);

@@ -86,11 +86,14 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return d.GetCremateCapacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
+			// TODO - figure out how these relate, also, how are cemeteries involved?
+			d.GetDeadAmount();
+			d.GetDeadCapacity();
 			return 0.0;
 		}
 	}
@@ -103,12 +106,12 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return (double) d.GetEducation1Capacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
-			return 0.0;
+			return (double) d.GetEducation1Need();
 		}
 	}
 
@@ -120,12 +123,12 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return (double) d.GetEducation2Capacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
-			return 0.0;
+			return (double) d.GetEducation2Need();
 		}
 	}
 
@@ -137,12 +140,12 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return (double) d.GetEducation3Capacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
-			return 0.0;
+			return (double) d.GetEducation3Need();
 		}
 	}
 
@@ -171,12 +174,12 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return (double) d.GetHealCapacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
-			return 0.0;
+			return (double) d.GetSickCount();
 		}
 	}
 
@@ -188,12 +191,12 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return (double) d.GetHeatingCapacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
-			return 0.0;
+			return (double) d.GetHeatingConsumption();
 		}
 	}
 
@@ -205,11 +208,14 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return (double) d.GetIncinerationCapacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
+			// TODO - figure out how these relate, also, how are landfills involved?
+			d.GetGarbageAmount();
+			d.GetGarbageCapacity();
 			return 0.0;
 		}
 	}
@@ -222,12 +228,12 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return (double) d.GetCriminalCapacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
-			return 0.0;
+			return (double) d.GetCriminalAmount();
 		}
 	}
 
@@ -239,12 +245,12 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return (double) d.GetSewageCapacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
-			return 0.0;
+			return (double) d.GetSewageAccumulation();
 		}
 	}
 
@@ -256,12 +262,12 @@ namespace Exportable
 
 		public override double GetCapacity(District d)
 		{
-			return 0.0;
+			return (double) d.GetWaterCapacity();
 		}
 
 		public override double GetConsumption(District d)
 		{
-			return 0.0;
+			return (double) d.GetWaterConsumption();
 		}
 	}
 }
