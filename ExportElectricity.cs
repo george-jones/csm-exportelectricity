@@ -63,13 +63,11 @@ namespace ExportElectricityMod
                     if (capacity > consumption && week_proportion > 0.0)
                     {
 
-                        //                    EconomyManager[] em_array = UnityEngine.Object.FindObjectsOfType<EconomyManager>();
                         EconomyManager EM = Singleton<EconomyManager>.instance;
 
-
                         export_earnings = (int)(week_proportion * (capacity - consumption) * pay_per_mw);
-                        if (!EM == null)
-                        {
+                        if (EM != null)
+                        {                            
                             // add income
                             EM.AddResource(EconomyManager.Resource.PublicIncome,
                                 export_earnings,
