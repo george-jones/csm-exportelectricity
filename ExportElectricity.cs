@@ -1,4 +1,4 @@
-using ICities;
+﻿using ICities;
 using ColossalFramework;
 using ColossalFramework.Plugins;
 using UnityEngine;
@@ -7,89 +7,124 @@ using System;
 
 namespace ExportElectricityMod
 {
-    public class ExportElectricity : IUserMod
-    {
+	public static class ExpmHolder
+	{
+		// because c# doesn't let you have bare variables in a namespace
+		private static Exportable.ExportableManager expm = null;
 
-        public string Name
-        {
-            get { return "Export Electricity Mod"; }
-        }
+		public static Exportable.ExportableManager get()
+		{
+			if (expm == null)
+			{
+				expm = new Exportable.ExportableManager ();
+			}
+			return expm;
+		}
+	}
 
-        public string Description
-        {
-            get { return "Earn money for unused electricity.  Only a modest income for power sources other than the Fusion power plant."; }
-        }
-    }
+	public static class Debugger
+	{
+		// Debugger.Write appends to a text file.  This is here because Debug.Log wasn't having any effect
+		// when called from OnUpdateMoneyAmount.  Maybe a Unity thing that event handlers can't log?  I dunno.
+		public static bool enabled = false; // switch to true for development.  Also enabled automatically on exception.
+		public static void Write(String s)
+		{
+			if (!enabled)
+			{
+				return;
+			}
 
-    public class EconomyExtension : EconomyExtensionBase
-    {
-        private bool updated = false;
-        private System.DateTime prevDate;
+			using (System.IO.FileStream file = new System.IO.FileStream("ExportElectricityModDebug.txt", FileMode.Append)) {
+				StreamWriter sw = new StreamWriter(file);
+				sw.WriteLine(s);
+    	       	sw.Flush();
+    	    }
+		}
+	}
 
-        public override long OnUpdateMoneyAmount(long internalMoneyAmount)
-        {
+	public class ExportElectricity : IUserMod
+	{
+		public string Name 
+		{
+			get { return "Export Electricity Mod"; }
+		}
+
+		public string Description 
+		{
+			get { return "Earn money for unused electricity and (optionally) other production."; }
+		}
+
+		public void OnSettingsUI(UIHelperBase helper)
+		{
+			UIHelperBase group = helper.AddGroup("Check to enable income from excess capacity");
+			ExpmHolder.get().AddOptions (group);			
+		}
+	}
+
+	public class EconomyExtension : EconomyExtensionBase
+	{
+		private bool updated = false;
+		private System.DateTime prevDate;
+
+		public override long OnUpdateMoneyAmount(long internalMoneyAmount)
+		{			
             try
             {
                 DistrictManager DMinstance = Singleton<DistrictManager>.instance;
                 Array8<District> dm_array = DMinstance.m_districts;
                 District d;
-                double capacity = 0;
-                double consumption = 0;
-                double pay_per_mw = 500.0;
-                double sec_per_day = 75600.0; // for some reason
-                double sec_per_week = 7 * sec_per_day;
-                double week_proportion = 0.0;
-                int export_earnings = 0;
+	            
+	            Debugger.Write("\r\n== OnUpdateMoneyAmount ==");
 
-                if (dm_array == null)
+				double sec_per_day = 75600.0; // for some reason
+				double sec_per_week = 7 * sec_per_day;
+				double week_proportion = 0.0;
+				int export_earnings = 0;
+				int earnings_shown = 0;
+
+ 				if (dm_array == null)
                 {
+                	Debugger.Write("early return, dm_array is null");
                     return internalMoneyAmount;
                 }
 
                 d = dm_array.m_buffer[0];
-                capacity = ((double)d.GetElectricityCapacity()) / 1000.0; // divide my 1000 to get megawatts
-                consumption = ((double)d.GetElectricityConsumption()) / 1000.0;
 
-                if (!updated)
-                {
-                    updated = true;
-                    prevDate = this.managers.threading.simulationTime;
-                }
-                else
-                {
-                    System.DateTime newDate = this.managers.threading.simulationTime;
-                    System.TimeSpan timeDiff = newDate.Subtract(prevDate);
-                    week_proportion = (((double)timeDiff.TotalSeconds) / sec_per_week);
-                    if (capacity > consumption && week_proportion > 0.0)
-                    {
-
-                        EconomyManager EM = Singleton<EconomyManager>.instance;
-
-                        export_earnings = (int)(week_proportion * (capacity - consumption) * pay_per_mw);
-                        if (EM != null)
-                        {                            
-                            // add income
-                            EM.AddResource(EconomyManager.Resource.PublicIncome,
-                                export_earnings,
-                                ItemClass.Service.None,
-                                ItemClass.SubService.None,
-                                ItemClass.Level.None);
-                        }
-                    }
-                    else
-                    {
-                        export_earnings = 0;
-                    }
-                    prevDate = newDate;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.Log("ExportElectricity: Exception " + ex.Message.ToString());
-            }
-            return internalMoneyAmount;
-
-        }
-
-    }
+				if (!updated) {
+					updated = true;
+					prevDate = this.managers.threading.simulationTime;
+					Debugger.Write("first run");
+				} else {
+					System.DateTime newDate = this.managers.threading.simulationTime;
+					System.TimeSpan timeDiff = newDate.Subtract (prevDate);
+					week_proportion = (((double) timeDiff.TotalSeconds) / sec_per_week);
+					if (week_proportion > 0.0) {
+						Debugger.Write("proportion: " + week_proportion.ToString());
+						EconomyManager EM = Singleton<EconomyManager>.instance;
+						if (EM != null) {
+							// add income							
+							export_earnings = (int) ExpmHolder.get().CalculateIncome(d, week_proportion);
+							earnings_shown = export_earnings / 100;
+							Debugger.Write("Total earnings: " + earnings_shown.ToString());
+							EM.AddResource(EconomyManager.Resource.PublicIncome,
+								export_earnings,
+								ItemClass.Service.None,
+								ItemClass.SubService.None,
+								ItemClass.Level.None);
+						}
+					} else {
+						Debugger.Write("week_proportion zero");
+					}
+					prevDate = newDate;
+				}	            	
+			}
+	        catch (Exception ex)
+	        {
+	        	// shouldn't happen, but if it does, start logging
+	        	Debugger.enabled = true;
+	        	Debugger.Write("Exception " + ex.Message.ToString());
+	        }
+			return internalMoneyAmount;
+		}
+	}
 }
