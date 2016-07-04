@@ -74,12 +74,13 @@ namespace ExportElectricityMod
                 Array8<District> dm_array = DMinstance.m_districts;
                 District d;
 	            
-	            Debugger.Write("== OnUpdateMoneyAmount ==");
+	            Debugger.Write("\r\n== OnUpdateMoneyAmount ==");
 
 				double sec_per_day = 75600.0; // for some reason
 				double sec_per_week = 7 * sec_per_day;
 				double week_proportion = 0.0;
 				int export_earnings = 0;
+				int earnings_shown = 0;
 
  				if (dm_array == null)
                 {
@@ -102,13 +103,14 @@ namespace ExportElectricityMod
 						EconomyManager EM = Singleton<EconomyManager>.instance;
 						if (EM != null) {
 							// add income							
-							export_earnings = (int) ExpmHolder.get().CalculateIncome(d, week_proportion);							
-							Debugger.Write("export_earnings: " + export_earnings.ToString());
+							export_earnings = (int) ExpmHolder.get().CalculateIncome(d, week_proportion);
+							earnings_shown = export_earnings / 100;
+							Debugger.Write("Total earnings: " + earnings_shown.ToString());
 							EM.AddResource(EconomyManager.Resource.PublicIncome,
 								export_earnings,
 								ItemClass.Service.None,
 								ItemClass.SubService.None,
-								ItemClass.Level.None);							
+								ItemClass.Level.None);
 						}
 					} else {
 						Debugger.Write("week_proportion zero");

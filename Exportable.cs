@@ -61,17 +61,23 @@ namespace Exportable
 
 		public double CalculateIncome(District d, double weekPortion)
 		{
-			double capacity = 0;
-			double consumption = 0;
+			double capacity = 0.0;
+			double consumption = 0.0;
+			double income = 0.0;
+			double incomeShown = 0.0;
 
-			capacity = ((double) this.GetCapacity (d));
+			capacity = ((double) this.GetCapacity(d));
 			consumption = ((double) this.GetConsumption(d));
 
 			if (capacity > consumption) {
-				return weekPortion * Rate * (capacity - consumption);
-			} else {
-				return 0.0;
+				incomeShown = weekPortion * Rate * (capacity - consumption);
+				// 100.0 because money is represented as cents
+				income = 100.0 * incomeShown;
 			}
+
+			Log(Id + " capacity " + capacity.ToString() + " consumption " + consumption.ToString() + " income " + incomeShown.ToString());
+
+			return income;
 		}
 
 		abstract public double GetCapacity(District d);
@@ -100,7 +106,7 @@ namespace Exportable
 
 	public class ExportableElementary : Exportable
 	{
-		public ExportableElementary(ExportableManager man) : base(man, Ids.ELEMENTARY, "Education - Elementary", 0.0) {
+		public ExportableElementary(ExportableManager man) : base(man, Ids.ELEMENTARY, "Education - Elementary", 0.43) {
 			// add more here if needed
 		}
 
@@ -117,7 +123,7 @@ namespace Exportable
 
 	public class ExportableHighSchool : Exportable
 	{
-		public ExportableHighSchool(ExportableManager man) : base(man, Ids.HIGH_SCHOOL , "Education - High School", 0.0) {
+		public ExportableHighSchool(ExportableManager man) : base(man, Ids.HIGH_SCHOOL , "Education - High School", 0.45) {
 			// add more here if needed
 		}
 
@@ -134,7 +140,7 @@ namespace Exportable
 
 	public class ExportableUniversity : Exportable
 	{
-		public ExportableUniversity(ExportableManager man) : base(man, Ids.UNIVERSITY, "Education - University", 0.0) {
+		public ExportableUniversity(ExportableManager man) : base(man, Ids.UNIVERSITY, "Education - University", 0.34) {
 			// add more here if needed
 		}
 
@@ -151,7 +157,7 @@ namespace Exportable
 
 	public class ExportableElectricity : Exportable
 	{
-		public ExportableElectricity(ExportableManager man) : base(man, Ids.ELECTRICITY, "Electricity", 0.5) {
+		public ExportableElectricity(ExportableManager man) : base(man, Ids.ELECTRICITY, "Electricity", 0.005) {
 			// add more here if needed
 		}
 
@@ -168,7 +174,7 @@ namespace Exportable
 
 	public class ExportableHealth : Exportable
 	{
-		public ExportableHealth(ExportableManager man) : base(man, Ids.HEALTH, "Health Care", 0.0) {
+		public ExportableHealth(ExportableManager man) : base(man, Ids.HEALTH, "Health Care", 3.8) {
 			// add more here if needed
 		}
 
@@ -185,7 +191,7 @@ namespace Exportable
 
 	public class ExportableHeat : Exportable
 	{
-		public ExportableHeat(ExportableManager man) : base(man, Ids.HEAT, "Heat", 0.0) {
+		public ExportableHeat(ExportableManager man) : base(man, Ids.HEAT, "Heat", 0.0048) {
 			// add more here if needed
 		}
 
@@ -222,7 +228,7 @@ namespace Exportable
 
 	public class ExportableJail : Exportable
 	{
-		public ExportableJail(ExportableManager man) : base(man, Ids.JAIL, "Jail Space", 0.0) {
+		public ExportableJail(ExportableManager man) : base(man, Ids.JAIL, "Jail Space", 21.0) {
 			// add more here if needed
 		}
 
@@ -239,7 +245,7 @@ namespace Exportable
 
 	public class ExportableSewage : Exportable
 	{
-		public ExportableSewage(ExportableManager man) : base(man, Ids.SEWAGE, "Sewage Treatment", 0.0) {
+		public ExportableSewage(ExportableManager man) : base(man, Ids.SEWAGE, "Sewage Treatment", 0.0032) {
 			// add more here if needed
 		}
 
@@ -256,7 +262,7 @@ namespace Exportable
 
 	public class ExportableWater : Exportable
 	{
-		public ExportableWater(ExportableManager man) : base(man, Ids.WATER, "Water", 0.0) {
+		public ExportableWater(ExportableManager man) : base(man, Ids.WATER, "Water", 0.0016) {
 			// add more here if needed
 		}
 
