@@ -8,12 +8,14 @@ namespace Exportable
 {
 	public class ExportableManager
 	{
-		private SortedDictionary<string, Exportable> exportables;
+		private SortedDictionary<string, Exportable> exportables;		
 		public const String CONF = "ExportElectricityModConfig.txt";
+		private float multiplier;
 
 		public ExportableManager ()
 		{
 			exportables = new SortedDictionary<string, Exportable> ();
+			multiplier = 1.0f;
 
 			//new ExportableCremation (this);
 			new ExportableElementary (this);
@@ -43,12 +45,20 @@ namespace Exportable
 		public void LoadSettings ()
 		{
 			Log ("Load Settings");
-			try { 
+			try {
 				using (System.IO.StreamReader file = 
 					new System.IO.StreamReader(CONF, true))
-				{
+				{					
 					String s = file.ReadLine ();
-					String [] ids = s.Split(new char[1]{','});
+					String [] sections = s.Split(new char[1]{'|'});
+					String [] ids;
+
+					ids = sections[0].Split(new char[1]{','});
+					if (sections.Length >= 2) {
+						multiplier = float.Parse(sections[1]);
+					} else {
+						multiplier = 1.0f;
+					}
 
 					foreach (var id in ids) {
 						if (exportables.ContainsKey(id)) {
@@ -77,7 +87,7 @@ namespace Exportable
 							enabled_ids.Add(pair.Key);
 						}
 					}
-					String cs = String.Join(",", enabled_ids.ToArray());
+					String cs = String.Join(",", enabled_ids.ToArray()) + "|" + multiplier.ToString();
 					Log ("Storing settings - enabled: " + cs);
 					sw.WriteLine(cs);
 					sw.Flush();
@@ -111,7 +121,7 @@ namespace Exportable
 				total += CalculateIncome (d, id, weekPortion);
 			}
 
-			return total;
+			return total * multiplier;
 		}
 
 		public void AddOptions (UIHelperBase group)
@@ -121,6 +131,13 @@ namespace Exportable
 				Exportable exp = exportables [id];
 				group.AddCheckbox(exp.Description, exp.GetEnabled(), exp.SetEnabled);
 			}
+			group.AddSlider ("Multiplier", 0.0f, 2.0f, 0.05f, multiplier, MultiplierSliderChanged);
+		}
+
+		private void MultiplierSliderChanged(float val)
+		{
+			multiplier = val;
+			StoreSettings();			
 		}
 	}
 }
