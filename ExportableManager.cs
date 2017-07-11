@@ -1,4 +1,4 @@
-﻿using ICities;
+using ICities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -132,7 +132,7 @@ namespace Exportable
 				group.AddCheckbox(exp.Description, exp.GetEnabled(), exp.SetEnabled);
 			}
 			group.AddSlider ("Multiplier", 0.0f, 2.0f, 0.05f, multiplier, MultiplierSliderChanged);
-			group.AddCheckbox ("Debug Mode", ExportElectricityMod.Debugger.enabled, SetDebug);
+      group.AddCheckbox ("Debug Mode", ExportElectricityMod.Debugger.enabled, SetDebug);
 		}
 
 		private void MultiplierSliderChanged(float val)
@@ -147,4 +147,3 @@ namespace Exportable
 		}
 	}
 }
-

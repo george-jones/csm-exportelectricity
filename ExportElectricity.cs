@@ -1,4 +1,4 @@
-﻿using ICities;
+using ICities;
 using ColossalFramework;
 using ColossalFramework.Plugins;
 using UnityEngine;
