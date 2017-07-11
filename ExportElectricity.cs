@@ -26,7 +26,7 @@ namespace ExportElectricityMod
 	{
 		// Debugger.Write appends to a text file.  This is here because Debug.Log wasn't having any effect
 		// when called from OnUpdateMoneyAmount.  Maybe a Unity thing that event handlers can't log?  I dunno.
-		public static bool enabled = false; // switch to true for development.  Also enabled automatically on exception.
+		public static bool enabled = false;
 		public static void Write(String s)
 		{
 			if (!enabled)
@@ -121,7 +121,6 @@ namespace ExportElectricityMod
 	        catch (Exception ex)
 	        {
 	        	// shouldn't happen, but if it does, start logging
-	        	Debugger.enabled = true;
 	        	Debugger.Write("Exception " + ex.Message.ToString());
 	        }
 			return internalMoneyAmount;
