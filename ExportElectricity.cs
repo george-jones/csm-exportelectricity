@@ -1,6 +1,7 @@
-using ICities;
+﻿using ICities;
 using ColossalFramework;
 using ColossalFramework.Plugins;
+using ColossalFramework.UI;
 using UnityEngine;
 using System.IO;
 using System;
@@ -26,7 +27,7 @@ namespace ExportElectricityMod
 	{
 		// Debugger.Write appends to a text file.  This is here because Debug.Log wasn't having any effect
 		// when called from OnUpdateMoneyAmount.  Maybe a Unity thing that event handlers can't log?  I dunno.
-		public static bool enabled = false;
+		public static bool enabled = true; // don't commit
 		public static void Write(String s)
 		{
 			if (!enabled)
@@ -106,7 +107,7 @@ namespace ExportElectricityMod
 							export_earnings = (int) ExpmHolder.get().CalculateIncome(d, week_proportion);
 							earnings_shown = export_earnings / 100;
 							Debugger.Write("Total earnings: " + earnings_shown.ToString());
-							EM.AddResource(EconomyManager.Resource.PublicIncome,
+						EM.AddResource(EconomyManager.Resource.PublicIncome,
 								export_earnings,
 								ItemClass.Service.None,
 								ItemClass.SubService.None,
@@ -124,6 +125,38 @@ namespace ExportElectricityMod
 	        	Debugger.Write("Exception " + ex.Message.ToString());
 	        }
 			return internalMoneyAmount;
+		}
+	}
+
+	public class ExportLoading : LoadingExtensionBase
+	{
+		public override void OnLevelLoaded(LoadMode mode)
+		{
+            UIView view = UIView.GetAView();
+            var c = view.FindUIComponent("IncomePanel");
+            Debugger.Write(c.name);
+
+            //view.FindUIComponent<ColossalFramework.UI.UISlicedSprite>()
+            //var c = view.FindUIComponent<ColossalFramework.UI.UISlicedSprite>();
+
+            //view.
+            //var c = view.GetComponents<ColossalFramework.UI.UISlicedSprite>();
+
+            //view.GetComponents<ColossalFramework.UI.>
+            /*
+            Debugger.Write(c.Length.ToString());
+            foreach (var comp in c)
+            {
+                Debugger.Write(comp.name);
+            }
+            */
+            //Debugger.Write(view.FindUIComponent("DemandBack").GetType().ToString());
+
+        }
+
+		public override void OnLevelUnloading()
+		{
+			
 		}
 	}
 }
