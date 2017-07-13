@@ -11,6 +11,8 @@ namespace Exportable
 		private SortedDictionary<string, Exportable> exportables;		
 		public const String CONF = "ExportElectricityModConfig.txt";
 		private float multiplier;
+        private const double interval = 1.0;
+        private double waited = 0.0;
 
 		public ExportableManager ()
 		{
@@ -41,6 +43,11 @@ namespace Exportable
 		{
 			exportables.Add (exp.Id, exp);
 		}
+
+        public SortedDictionary<string, Exportable> GetExportables()
+        {
+            return exportables;
+        }
 
 		public void LoadSettings ()
 		{
@@ -115,11 +122,20 @@ namespace Exportable
 		public double CalculateIncome (District d, double weekPortion)
 		{
 			double total = 0.0;
-			Log ("Calculating Income");
+
+            waited += weekPortion;
+            if (waited < interval)
+            {
+                return 0;
+            }
+
+            Log ("Calculating Income");
 
 			foreach (var id in exportables.Keys) {
-				total += CalculateIncome (d, id, weekPortion);
+				total += CalculateIncome (d, id, waited);
 			}
+
+            waited = 0.0;
 
 			return total * multiplier;
 		}
