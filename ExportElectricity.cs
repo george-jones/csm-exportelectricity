@@ -172,15 +172,40 @@ namespace ExportElectricityMod
     {
         private Rect windowRect = new Rect(Screen.width - 300, Screen.height - 450, 300, 300);
         private bool showingWindow = false;
+        private bool uiSetup = false;
+
+        private void SetupUI()
+        {
+            uiSetup = true;
+
+            var policies = ExpmHolder.view.FindUIComponent("Policies");
+            var tb = policies.parent; // TSBar/MainToolstrip
+
+            var button = tb.AddUIComponent<UIButton>();
+            //button.atlas = defaultAtlas
+            button.text = "Ex";
+            button.size = new Vector2(32f, 32f);
+            button.position = policies.position + new Vector3(policies.size.x + 2f, 0f); // y position doesn't seem able to change no matter what I put in
+            button.tooltip = "Exports Income";
+            button.textVerticalAlignment = UIVerticalAlignment.Middle;
+            button.eventClick += new MouseEventHandler(buttonClick);
+ 
+        }
+
+        private void buttonClick(UIComponent sender, UIMouseEventParameter e)
+        {
+            showingWindow = !showingWindow;
+        }
 
         void OnGUI()
         {
             if (ExpmHolder.view.enabled)
             {
-                if (GUI.Button(new Rect(ExpmHolder.buttonX, ExpmHolder.buttonY, 30, 20), "Ex"))
+                if (!uiSetup)
                 {
-                    showingWindow = true;
+                    SetupUI();
                 }
+
                 if (showingWindow)
                 {
                     windowRect = GUILayout.Window(314, windowRect, ShowExportIncomeWindow, "Weekly Income from Exports");                
