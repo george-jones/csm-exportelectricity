@@ -177,10 +177,15 @@ namespace ExportElectricityMod
         private void SetupUI()
         {
             uiSetup = true;
+            UIComponent policies = ExpmHolder.view.FindUIComponent("Policies");
+            UIComponent tb = policies.parent; // TSBar/MainToolstrip
+            string[] imgtypes = new string[] { "normalBg", "disabledBg", "hoveredBg", "pressedBg", "focusedBg", "normalFg", "pressedFg" };
 
-            var policies = ExpmHolder.view.FindUIComponent("Policies");
-            var tb = policies.parent; // TSBar/MainToolstrip
-
+            var button = tb.AddUIComponent<UIUtils.ImageButton>();            
+            Debugger.Write(button.SetDetail("expinc", "exporticon.png", "Exports Income", 32, 32, imgtypes));
+            
+            //(string btnName, string imgFilename, string btnTooltip, int btnWidth, int btnHeight, string[] types)
+            /*
             var button = tb.AddUIComponent<UIButton>();
             //button.atlas = defaultAtlas
             button.text = "Ex";
@@ -188,8 +193,9 @@ namespace ExportElectricityMod
             button.position = policies.position + new Vector3(policies.size.x + 2f, 0f); // y position doesn't seem able to change no matter what I put in
             button.tooltip = "Exports Income";
             button.textVerticalAlignment = UIVerticalAlignment.Middle;
+            */
             button.eventClick += new MouseEventHandler(buttonClick);
- 
+            
         }
 
         private void buttonClick(UIComponent sender, UIMouseEventParameter e)
