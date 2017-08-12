@@ -231,7 +231,7 @@ namespace Exportable
 
 	public class ExportableJail : Exportable
 	{
-		public ExportableJail(ExportableManager man) : base(man, Ids.JAIL, "Jail Space", 21.0) {
+		public ExportableJail(ExportableManager man) : base(man, Ids.JAIL, "Jail Space", 3.0) {
 			// add more here if needed
 		}
 

@@ -1,6 +1,5 @@
 ﻿using ICities;
 using ColossalFramework;
-using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using UnityEngine;
 using System.IO;
@@ -173,27 +172,19 @@ namespace ExportElectricityMod
         private Rect windowRect = new Rect(Screen.width - 300, Screen.height - 450, 300, 300);
         private bool showingWindow = false;
         private bool uiSetup = false;
+        private UIUtils.ImageButton button;
+        private UIComponent tb;
 
         private void SetupUI()
         {
             uiSetup = true;
             UIComponent policies = ExpmHolder.view.FindUIComponent("Policies");
-            UIComponent tb = policies.parent; // TSBar/MainToolstrip
+            tb = policies.parent; // TSBar/MainToolstrip
             string[] imgtypes = new string[] { "normalBg", "disabledBg", "hoveredBg", "pressedBg", "focusedBg", "normalFg", "pressedFg" };
 
-            var button = tb.AddUIComponent<UIUtils.ImageButton>();            
-            Debugger.Write(button.SetDetail("expinc", "exporticon.png", "Exports Income", 32, 32, imgtypes));
-            
-            //(string btnName, string imgFilename, string btnTooltip, int btnWidth, int btnHeight, string[] types)
-            /*
-            var button = tb.AddUIComponent<UIButton>();
-            //button.atlas = defaultAtlas
-            button.text = "Ex";
-            button.size = new Vector2(32f, 32f);
-            button.position = policies.position + new Vector3(policies.size.x + 2f, 0f); // y position doesn't seem able to change no matter what I put in
-            button.tooltip = "Exports Income";
-            button.textVerticalAlignment = UIVerticalAlignment.Middle;
-            */
+            button = tb.AddUIComponent<UIUtils.ImageButton>();
+            Debugger.Write(button.SetDetail("expinc", "exporticon.png", "Exports Income", 32, 42, imgtypes));
+
             button.eventClick += new MouseEventHandler(buttonClick);
             
         }
@@ -214,7 +205,7 @@ namespace ExportElectricityMod
 
                 if (showingWindow)
                 {
-                    windowRect = GUILayout.Window(314, windowRect, ShowExportIncomeWindow, "Weekly Income from Exports");                
+                    windowRect = GUILayout.Window(314, windowRect, ShowExportIncomeWindow, "Weekly Income from Exports");
                 }
             }
         }
@@ -248,14 +239,15 @@ namespace ExportElectricityMod
             GUILayout.FlexibleSpace();
             GUILayout.Label(totalEarned.ToString());
             GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
+            
+            GUILayout.BeginHorizontal();            
             if (GUILayout.Button("Close"))
             {
+                button.state = UIButton.ButtonState.Normal;
                 showingWindow = false;
             }
             GUILayout.EndHorizontal();
-
+            
             GUI.DragWindow();
         }
 
