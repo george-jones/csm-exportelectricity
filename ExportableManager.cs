@@ -1,4 +1,4 @@
-using ICities;
+﻿using ICities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +11,8 @@ namespace Exportable
 		private SortedDictionary<string, Exportable> exportables;		
 		public const String CONF = "ExportElectricityModConfig.txt";
 		private float multiplier;
+        private const double interval = 1.0;
+        private double waited = 0.0;
 
 		public ExportableManager ()
 		{
@@ -41,6 +43,11 @@ namespace Exportable
 		{
 			exportables.Add (exp.Id, exp);
 		}
+
+        public SortedDictionary<string, Exportable> GetExportables()
+        {
+            return exportables;
+        }
 
 		public void LoadSettings ()
 		{
@@ -115,11 +122,20 @@ namespace Exportable
 		public double CalculateIncome (District d, double weekPortion)
 		{
 			double total = 0.0;
-			Log ("Calculating Income");
+
+            waited += weekPortion;
+            if (waited < interval)
+            {
+                return 0;
+            }
+
+            Log ("Calculating Income");
 
 			foreach (var id in exportables.Keys) {
-				total += CalculateIncome (d, id, weekPortion);
+				total += CalculateIncome (d, id, waited);
 			}
+
+            waited = 0.0;
 
 			return total * multiplier;
 		}
@@ -132,7 +148,7 @@ namespace Exportable
 				group.AddCheckbox(exp.Description, exp.GetEnabled(), exp.SetEnabled);
 			}
 			group.AddSlider ("Multiplier", 0.0f, 2.0f, 0.05f, multiplier, MultiplierSliderChanged);
-      group.AddCheckbox ("Debug Mode", ExportElectricityMod.Debugger.enabled, SetDebug);
+			group.AddCheckbox ("Debug Mode", ExportElectricityMod.Debugger.enabled, SetDebug);
 		}
 
 		private void MultiplierSliderChanged(float val)
@@ -147,3 +163,4 @@ namespace Exportable
 		}
 	}
 }
+

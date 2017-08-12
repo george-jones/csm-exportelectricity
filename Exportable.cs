@@ -22,6 +22,7 @@ namespace Exportable
 	{
 		public string Id;
 		public string Description;
+        public double LastWeeklyEarning;
 		private bool Enabled;
 		private ExportableManager Expm;
 		private double Rate;
@@ -33,7 +34,8 @@ namespace Exportable
 			Enabled = false;
 			Rate = inRate;
 			Expm = inExpm;
-			Expm.AddExportable (this);
+            LastWeeklyEarning = 0.0;
+            Expm.AddExportable (this);
 		}
 
 		public void Log (String msg)
@@ -76,8 +78,9 @@ namespace Exportable
 			}
 
 			Log(Id + " capacity " + capacity.ToString() + " consumption " + consumption.ToString() + " income " + incomeShown.ToString());
+            LastWeeklyEarning = income / weekPortion;
 
-			return income;
+            return income;
 		}
 
 		abstract public double GetCapacity(District d);
@@ -228,7 +231,7 @@ namespace Exportable
 
 	public class ExportableJail : Exportable
 	{
-		public ExportableJail(ExportableManager man) : base(man, Ids.JAIL, "Jail Space", 21.0) {
+		public ExportableJail(ExportableManager man) : base(man, Ids.JAIL, "Jail Space", 3.0) {
 			// add more here if needed
 		}
 
